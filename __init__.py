@@ -28,15 +28,15 @@ import types
 
 from zprocess import zmq_get
 
-__version__ = '2.0.0'
+__version__ = '2.1.0'
 
 try:
     from labscript_utils import check_version
 except ImportError:
     raise ImportError('Require labscript_utils > 2.1.0')
 
-# allow pandas v0.15.0 to v0.19.x inclusive (mor than 0.16.x not tested!)
-check_version('pandas', '0.15.0', '0.20.0')
+# require pandas v0.15.0 up to the next major version
+check_version('pandas', '0.15.0', '1.0')
 
 # If running stand-alone, and not from within lyse, the below two variables
 # will be as follows. Otherwise lyse will override them with spinning_top =
@@ -47,6 +47,19 @@ if len(sys.argv) > 1:
     path = sys.argv[1]
 else:
     path = None
+
+
+class _RoutineStorage(object):
+    """An empty object that analysis routines can store data in. It will
+    persist from one run of an analysis routine to the next when the routine
+    is being run from within lyse. No attempt is made to store data to disk,
+    so if the routine is run multiple times from the command line instead of
+    from lyse, or the lyse analysis subprocess is restarted, data will not be
+    retained. An alternate method should be used to store data if desired in
+    these cases."""
+    pass
+
+routine_storage = _RoutineStorage()
 
 
 def data(filepath=None, host='localhost', timeout=5):
